@@ -2,10 +2,14 @@ import requests # Permet de faire des requetes sur Internet
 import re # Permet d'exporter un nombre d'un string
 from bs4 import BeautifulSoup # Permet de faire du WebScrapping
 import csv # Permet de transférer des données vers un fichier csv
+from urllib.parse import urljoin # Permet de fusionner deux URL ensemble
 
 url = "http://books.toscrape.com/catalogue/ms-marvel-vol-1-no-normal-ms-marvel-2014-2015-1_34/index.html" # défini le nom du site dans la variable url
+url_general="https://books.toscrape.com" # Page de départ
 page = requests.get(url) # défini la variable qui appel le site
 soup = BeautifulSoup(page.content, "html.parser") #Initialise le fichier
+
+
 
 #------- Définir l'ordre des colonnes CSV
 liste_entete=[
@@ -42,9 +46,6 @@ dico_courant={}
 
 #------- Récupére le product_page_url .....
 dico_courant["url"]="URL Vide"
-#------- Récupére le image_url
-dico_courant["image"]="Image Vide"
-#------- Mettre les valeurs dans un dictionnaire
 
 #------- Récupére le title
 balise_title=soup.find("div", class_="col-sm-6 product_main") # Recherche le paragraphe du titre
@@ -69,7 +70,7 @@ for balise in balise_category: #Parcours les différentes balises
         dico_courant["category"]=balise_category
 
 
-balises_th = soup.find_all('th') #Recherche toutes les balises th
+balises_th = soup.find_all("th") #Recherche toutes les balises th
 for balise in balises_th: #Parcours toutes les balises th trouvées
 #------- Récupére le universal_product_code (upc)
     if  balise.get_text() == "UPC": #Si la balise th s'appelle UPC
@@ -102,20 +103,28 @@ for balise in balises_th: #Parcours toutes les balises th trouvées
          review_balise=review_balise.get_text() #Récupere juste le texte
          dico_courant["review"]=review_balise
          
+#------- Récupére le image_url
+for image in soup.findAll("img"): # Balaie toutes les balises pour trouver les images
+    if image.get('alt', '') == balise_title:# Recherche la balise correspondant au livre en cours
+        balise_url_provisoire=image['src']# Récupere l'adresse src de l'image
+
+balise_url=urljoin(str(url_general), str(balise_url_provisoire)) #Fusionne les deux URL
+dico_courant["image"]=balise_url
+         
 #------ Met le dico courant dans un dico spécial pour l'album
 globals()['dico_%s' % balise_title] = dico_courant #Copie le dico courant dans le dico général
 liste_ouvrage=[balise_title] #Creait un liste avec tous les noms d'ouvrage
 
 #-----------------Fin de la boucle possible à partir d'ici--------------------------
 
-#------ Export dans un fichier csv
+#-----------------Export dans un fichier csv--------------------------
 #------ Mise en place des entêtes
 liste_entete_csv_export=[] # Création d'une liste vide pour déverser les valeurs dans le fichier CSV
 for key in liste_entete: # Parcourir la liste pour définir l'ordre des entêtes
     liste_entete_csv_export.append(dico_entete[key]) # Création d'une liste pour déverser dans le CSV
         
 with open('export_livre.csv','w',newline='') as fichiercsv: # Création d'un fichier CSV
-    writer = csv.writer(fichiercsv)
+    writer = csv.writer(fichiercsv,delimiter=',')
     writer.writerow(liste_entete_csv_export)# Deverse les lignes dans le fichier
 
 #------ Mise en place des champs
@@ -125,7 +134,7 @@ for key in liste_entete:# Parcourir la liste pour définir l'ordre des valeurs
     
         
 with open('export_livre.csv','a',newline='') as fichiercsv: # Réutilise le fichier CSV
-    writer = csv.writer(fichiercsv)
+    writer = csv.writer(fichiercsv,delimiter=',')
     writer.writerow(liste_ouvrage_csv_export)# Deverse les lignes dans le fichier
 
 
