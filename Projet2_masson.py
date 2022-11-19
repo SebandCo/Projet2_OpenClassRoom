@@ -1,17 +1,49 @@
 import requests # Permet de faire des requetes sur Internet
 import re # Permet d'exporter un nombre d'un string
 from bs4 import BeautifulSoup # Permet de faire du WebScrapping
+import csv # Permet de transférer des données vers un fichier csv
 
 url = "http://books.toscrape.com/catalogue/ms-marvel-vol-1-no-normal-ms-marvel-2014-2015-1_34/index.html" # défini le nom du site dans la variable url
 page = requests.get(url) # défini la variable qui appel le site
 soup = BeautifulSoup(page.content, "html.parser") #Initialise le fichier
+
+#------- Définir l'ordre des colonnes CSV
+liste_entete=[
+    "image",
+    "url",
+    "upc",
+    "title",
+    "tax",
+    "no_tax",
+    "availability",
+    "description",
+    "category",   
+    "review",
+    ]
+#------- Définir la valeur des entêtes CSV
+dico_entete={
+    "url"          : "Product_page_url",
+    "upc"          : "Universal_product_code (upc)",
+    "title"        : "Title",
+    "tax"          : "Price_including_tax",
+    "no_tax"       : "Price_excluding_tax",
+    "availability" : "Number_available",
+    "description"  : "Product_description",
+    "category"     : "Category",   
+    "review"       : "Review_rating",
+    "image"        : "Image_url"
+    }
+
+#-----------------Boucle possible à partir d'ici--------------------------
 
 #------- Creait un dico vide avec les informations de l'album
 dico_courant={}
 
 
 #------- Récupére le product_page_url .....
+dico_courant["url"]="URL Vide"
 #------- Récupére le image_url
+dico_courant["image"]="Image Vide"
 #------- Mettre les valeurs dans un dictionnaire
 
 #------- Récupére le title
@@ -24,7 +56,7 @@ dico_courant["title"]=balise_title
 balise_description=soup.find("div", id="product_description")# Recherche le paragraphe de la description
 balise_description=balise_description.find_next("p")#Recherche le paragraphe principale situé après
 balise_description=balise_description.get_text()#Extrait le texte du paragraphe
-dico_courant["desription"]=balise_description
+dico_courant["description"]=balise_description
 
 
 #------- Récupére le category
@@ -71,4 +103,32 @@ for balise in balises_th: #Parcours toutes les balises th trouvées
          dico_courant["review"]=review_balise
          
 #------ Met le dico courant dans un dico spécial pour l'album
-globals()['dico_%s' % balise_title] = dico_courant 
+globals()['dico_%s' % balise_title] = dico_courant #Copie le dico courant dans le dico général
+liste_ouvrage=[balise_title] #Creait un liste avec tous les noms d'ouvrage
+
+#-----------------Fin de la boucle possible à partir d'ici--------------------------
+
+#------ Export dans un fichier csv
+#------ Mise en place des entêtes
+liste_entete_csv_export=[] # Création d'une liste vide pour déverser les valeurs dans le fichier CSV
+for key in liste_entete: # Parcourir la liste pour définir l'ordre des entêtes
+    liste_entete_csv_export.append(dico_entete[key]) # Création d'une liste pour déverser dans le CSV
+        
+with open('export_livre.csv','w',newline='') as fichiercsv: # Création d'un fichier CSV
+    writer = csv.writer(fichiercsv)
+    writer.writerow(liste_entete_csv_export)# Deverse les lignes dans le fichier
+
+#------ Mise en place des champs
+liste_ouvrage_csv_export=[] # Création d'une liste vide pour déverser les valeurs dans le fichier CSV
+for key in liste_entete:# Parcourir la liste pour définir l'ordre des valeurs
+    liste_ouvrage_csv_export.append(globals()['dico_%s' % balise_title][key])# Création d'une liste pour déverser dans le CSV
+    
+        
+with open('export_livre.csv','a',newline='') as fichiercsv: # Réutilise le fichier CSV
+    writer = csv.writer(fichiercsv)
+    writer.writerow(liste_ouvrage_csv_export)# Deverse les lignes dans le fichier
+
+
+
+for key,value in dico_entete.items():
+    print(key, ':', value)
