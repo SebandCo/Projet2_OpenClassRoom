@@ -4,8 +4,9 @@ from bs4 import BeautifulSoup # Permet de faire du WebScrapping
 import csv # Permet de transférer des données vers un fichier csv
 from urllib.parse import urljoin # Permet de fusionner deux URL ensemble
 
+url_general="https://books.toscrape.com"
 url = "http://books.toscrape.com/catalogue/ms-marvel-vol-1-no-normal-ms-marvel-2014-2015-1_34/index.html" # défini le nom du site dans la variable url
-url_general="https://books.toscrape.com" # Page de départ
+url = "https://books.toscrape.com/catalogue/sapiens-a-brief-history-of-humankind_996/index.html"
 page = requests.get(url) # défini la variable qui appel le site
 soup = BeautifulSoup(page.content, "html.parser") #Initialise le fichier
 
@@ -110,6 +111,14 @@ for image in soup.findAll("img"): # Balaie toutes les balises pour trouver les i
 
 balise_url=urljoin(str(url_general), str(balise_url_provisoire)) #Fusionne les deux URL
 dico_courant["image"]=balise_url
+
+#------- Récupére le fichier image
+
+nom_livre=re.split('/', url)
+f = open(nom_livre[-2]+".jpg",'wb')
+response = requests.get(balise_url)
+f.write(response.content)
+f.close()
          
 #------ Met le dico courant dans un dico spécial pour l'album
 globals()['dico_%s' % balise_title] = dico_courant #Copie le dico courant dans le dico général
