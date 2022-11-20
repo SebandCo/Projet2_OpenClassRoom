@@ -3,10 +3,12 @@ import re # Permet d'exporter un nombre d'un string
 from bs4 import BeautifulSoup # Permet de faire du WebScrapping
 import csv # Permet de transférer des données vers un fichier csv
 from urllib.parse import urljoin # Permet de fusionner deux URL ensemble
+import os #Permet de se déplacer dans des fichiers
 
 url_general="https://books.toscrape.com"
 url = "http://books.toscrape.com/catalogue/ms-marvel-vol-1-no-normal-ms-marvel-2014-2015-1_34/index.html" # défini le nom du site dans la variable url
 url = "https://books.toscrape.com/catalogue/sapiens-a-brief-history-of-humankind_996/index.html"
+url = "https://books.toscrape.com/catalogue/rat-queens-vol-3-demons-rat-queens-collected-editions-11-15_921/index.html"
 page = requests.get(url) # défini la variable qui appel le site
 soup = BeautifulSoup(page.content, "html.parser") #Initialise le fichier
 
@@ -113,9 +115,11 @@ balise_url=urljoin(str(url_general), str(balise_url_provisoire)) #Fusionne les d
 dico_courant["image"]=balise_url
 
 #------- Récupére le fichier image
-
-nom_livre=re.split('/', url)
-f = open(nom_livre[-2]+".jpg",'wb')
+if not os.path.exists("image/"+balise_category):#Vérifie si le repertoire existe
+    os.makedirs("image/"+balise_category)#Creation du répertoire si besoin
+    
+nom_livre=re.split('/', url)#Récupération du nom du livre à partir de l'url
+f = open("image/"+balise_category+"/"+nom_livre[-2]+".jpg",'wb')#Enregistrement du fichier image
 response = requests.get(balise_url)
 f.write(response.content)
 f.close()
