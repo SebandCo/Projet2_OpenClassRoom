@@ -5,6 +5,7 @@ from urllib.parse import urljoin # Permet de fusionner deux URL ensemble
 url_general="https://books.toscrape.com"
 url_actuel = "https://books.toscrape.com/catalogue/category/books/sequential-art_5/index.html" # défini le nom du site dans la variable url
 #url2="https://books.toscrape.com/catalogue/category/books/erotica_50/index.html"
+url_actuel="https://books.toscrape.com/catalogue/category/books/sequential-art_5/page-2.html"
 page_actuel = requests.get(url_actuel) # défini la variable qui appel le site
 soup_actuel = BeautifulSoup(page_actuel.content, "html.parser")
 
@@ -19,10 +20,11 @@ for balise in soup_actuel.find_all("a"): # Balaie tout les liens
         
 
 if soup_actuel.find("ul",class_="pager"): # Vérifie que le bandeau de changement de page existe
-    soup_provisoire=soup_actuel.find("ul", class_="pager")
-    if soup_provisoire.find("li", class_="next"):
-        url_provisoire=balise["href"]
-        url_actuel=urljoin(str(url_actuel), str(url_provisoire))
+    soup_provisoire=soup_actuel.find("ul", class_="pager")# Récupere que la partie du bandeau
+    if soup_provisoire.find("li", class_="next"):# Vérifie qu'il existe une page suivante
+        soup_provisoire=soup_provisoire.find("li", class_="next").find_next()#Récupere la dernier balise contenant le lien next
+        url_provisoire=soup_provisoire["href"]# Récupere l'URL de la page suivante
+        url_actuel=urljoin(str(url_actuel), str(url_provisoire)) # Fusionne les deux URL pour avoir l'URL complet
    
         print("Deux pages")
 else:
