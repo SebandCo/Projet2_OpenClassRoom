@@ -1,9 +1,10 @@
 from projet2_masson_fonction import *
 
 url_general="https://books.toscrape.com"
-url_courant = "http://books.toscrape.com/catalogue/ms-marvel-vol-1-no-normal-ms-marvel-2014-2015-1_34/index.html" # défini le nom du site dans la variable url
-url_courant = "https://books.toscrape.com/catalogue/sapiens-a-brief-history-of-humankind_996/index.html"
-url_courant = "https://books.toscrape.com/catalogue/rat-queens-vol-3-demons-rat-queens-collected-editions-11-15_921/index.html"
+#url_actuel_categorie = "https://books.toscrape.com/catalogue/category/books/sequential-art_5/index.html" # défini le nom du site dans la variable url
+url_actuel_categorie="https://books.toscrape.com/catalogue/category/books/erotica_50/index.html"
+#url_actuel_categorie="https://books.toscrape.com/catalogue/category/books/fiction_10/index.html"
+url_actuel_categorie="https://books.toscrape.com/catalogue/category/books/romance_8/index.html"
 
 #------- Définir l'ordre des colonnes CSV
 liste_entete=[
@@ -34,7 +35,18 @@ dico_entete={
 #------ Définir le nom du fichier csv
 nom_du_csv="export_livre02"
 
-
-
+#------ Initialisation du fichier csv
 creation_csv(liste_entete, dico_entete,nom_du_csv)
-analyse_livre(liste_entete,dico_entete,url_general,url_courant,nom_du_csv)# Lance l'analyse d'un livre à partir de l'URL courant
+
+liste_ouvrage_categorie=[]    
+
+#------ Export des livres par catégorie
+lancement_export_ouvrage(url_general,url_actuel_categorie, liste_ouvrage_categorie)
+
+for livre in liste_ouvrage_categorie:
+    url_courant_livre=livre
+    print(url_courant_livre)
+    analyse_livre(liste_entete,dico_entete,url_general,url_courant_livre,nom_du_csv)
+
+
+print("Fin de l'analyse")
