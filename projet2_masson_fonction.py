@@ -6,6 +6,23 @@ from urllib.parse import urljoin # Permet de fusionner deux URL ensemble
 import os #Permet de se déplacer dans des fichiers
 
 #-----------------------------------------------------------------
+# Fonction pour lancer la recherche des categories
+#-----------------------------------------------------------------
+def lancement_export_categorie(url_general,dico_categorie):
+    page_actuel = requests.get(url_general) # défini la variable qui appel le site
+    soup_actuel = BeautifulSoup(page_actuel.content, "html.parser") #Création de la soupe
+    
+    soup_categorie=soup_actuel.find("ul", class_="nav nav-list") # Récupère le bandeau de navigation
+
+    for balise in soup_categorie.find_all("a"):# Balaie les balises
+        categorie=balise.get_text()#Récupére le texte
+        categorie=categorie.strip()#Enleve les espaces devant et derrière le texte
+        url_provisoire=balise["href"]#Récupère les liens
+        if str(url_provisoire).find("books_1")==-1: #Si le lien est différent du lien principal
+            url_actuel=urljoin(str(url_general), str(url_provisoire))# Fusionne les deux URL 
+            dico_categorie[categorie]=url_actuel #Mets l'URL de la categorie dans le dico
+
+#-----------------------------------------------------------------
 # Fonction pour lancer la recherche de livre par catégorie
 #-----------------------------------------------------------------
 
@@ -18,11 +35,8 @@ def lancement_export_ouvrage(url_general,url_actuel_categorie, liste_ouvrage_cat
             url_provisoire=soup_provisoire["href"]# Récupere l'URL de la page suivante
             url_actuel_categorie=urljoin(str(url_actuel_categorie), str(url_provisoire)) # Fusionne les deux URL pour avoir l'URL complet
             soup_actuel=export_ouvrage(url_actuel_categorie,liste_ouvrage_categorie)#passage suivant
-            print("Deux pages")
         else:
-            print("Une seule page")
             break
-
 
 
 #-----------------------------------------------------------------
@@ -143,10 +157,6 @@ def analyse_livre(liste_entete,dico_entete,url_general,url_courant_livre,nom_du_
     f.write(response.content)
     f.close()
          
-#------ Met le dico courant dans un dico spécial pour l'album
-#    globals()['dico_%s' % balise_title] = dico_courant #Copie le dico courant dans le dico général
-#    liste_ouvrage=[balise_title] #Creait un liste avec tous les noms d'ouvrage
-
 #-----------------Export dans un fichier csv--------------------------
 #------ Mise en place des champs
     liste_ouvrage_csv_export=[] # Création d'une liste vide pour déverser les valeurs dans le fichier CSV
