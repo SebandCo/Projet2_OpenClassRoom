@@ -61,7 +61,7 @@ def creation_csv(liste_entete,dico_entete,nom_du_csv):
     for key in liste_entete: # Parcourir la liste pour définir l'ordre des entêtes
         liste_entete_csv_export.append(dico_entete[key]) # Création d'une liste pour déverser dans le CSV
             
-    with open(nom_du_csv+".csv","w",newline="") as fichiercsv: # Création d'un fichier CSV
+    with open(nom_du_csv+".csv","w",newline="",encoding="utf-32") as fichiercsv: # Création d'un fichier CSV en encodage UTF32 pour caractère spéciaux
         writer = csv.writer(fichiercsv,delimiter=",")
         writer.writerow(liste_entete_csv_export)# Deverse les lignes dans le fichier
 
@@ -69,7 +69,7 @@ def creation_csv(liste_entete,dico_entete,nom_du_csv):
 #-----------------------------------------------------------------
 # Fonction pour l'export des données du livre
 #-----------------------------------------------------------------
-def analyse_livre(liste_entete,dico_entete,url_general,url_courant_livre,nom_du_csv):
+def analyse_livre(liste_entete,dico_entete,url_general,url_courant_livre,nom_du_csv,fichier_image):
 
     page = requests.get(url_courant_livre) # défini la variable qui appel le site
     soup = BeautifulSoup(page.content, "html.parser") #Initialise le fichier
@@ -80,20 +80,23 @@ def analyse_livre(liste_entete,dico_entete,url_general,url_courant_livre,nom_du_
 
 
 #------- Récupére le product_page_url .....
-    dico_courant["url"]="URL Vide"
+    dico_courant["url"]=url_courant_livre
 
 #------- Récupére le title
     balise_title=soup.find("div", class_="col-sm-6 product_main") # Recherche le paragraphe du titre
     balise_title=balise_title.find("h1")# Recherche le titre h1 dans le paragraphe
     balise_title=balise_title.get_text()# Extrait le texte du titre h1
-    dico_courant["title"]=balise_title
+    dico_courant["title"]="\""+balise_title+"\"" #Met le texte entre guillemet pour faciliter le transfert vers xls
 
 #------- Récupére le product_description
     balise_description=soup.find("div", id="product_description")# Recherche le paragraphe de la description
-    balise_description=balise_description.find_next("p")#Recherche le paragraphe principale situé après
-    balise_description=balise_description.get_text()#Extrait le texte du paragraphe
-    dico_courant["description"]=balise_description
-
+    if balise_description:#Si la balise n'est pas vide
+        balise_description=balise_description.find_next("p")#Recherche le paragraphe principale situé après
+        balise_description=balise_description.get_text()#Extrait le texte du paragraphe
+        dico_courant["description"]="\""+balise_description+"\"" #Met le texte entre guillemet pour faciliter le transfert vers xls
+        #dico_courant["description"]=balise_description.replace(";",",") #Remplace les ; par , car problème lors du transfert csv->excel
+    else:#Si la balise est vide
+        dico_courant["description"]="Pas de description pour cet ouvrage"
 
 #------- Récupére le category
     balise_category=soup.find("ul",class_="breadcrumb") #Recherche le chemin de fer de la localisation
@@ -148,11 +151,11 @@ def analyse_livre(liste_entete,dico_entete,url_general,url_courant_livre,nom_du_
     dico_courant["image"]=balise_url
 
 #------- Récupére le fichier image (nom+fichier)
-    if not os.path.exists("image/"+balise_category):#Vérifie si le repertoire existe
-        os.makedirs("image/"+balise_category)#Creation du répertoire si besoin
+    if not os.path.exists(fichier_image+"/"+balise_category):#Vérifie si le repertoire existe
+        os.makedirs(fichier_image+"/"+balise_category)#Creation du répertoire si besoin
     
     nom_livre=re.split('/', url_courant_livre)#Récupération du nom du livre à partir de l'url
-    f = open("image/"+balise_category+"/"+nom_livre[-2]+".jpg",'wb')#Enregistrement du fichier image
+    f = open(fichier_image+"/"+balise_category+"/"+nom_livre[-2]+".jpg",'wb')#Enregistrement du fichier image
     response = requests.get(balise_url)
     f.write(response.content)
     f.close()
@@ -163,7 +166,7 @@ def analyse_livre(liste_entete,dico_entete,url_general,url_courant_livre,nom_du_
     for key in liste_entete:# Parcourir la liste pour définir l'ordre des valeurs
         liste_ouvrage_csv_export.append(dico_courant[key])# Création d'une liste pour déverser dans le CSV
       
-    with open(nom_du_csv+".csv","a",newline="") as fichiercsv: # Réutilise le fichier CSV
+    with open(nom_du_csv+".csv","a",newline="",encoding="utf-32") as fichiercsv: # Réutilise le fichier CSV. Force l'encodage pour caractère spéciaux
         writer = csv.writer(fichiercsv,delimiter=",")
         writer.writerow(liste_ouvrage_csv_export)# Deverse les lignes dans le fichier
 
