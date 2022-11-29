@@ -7,7 +7,7 @@ import os #Permet de se déplacer dans des fichiers
 
 
 #-----------------------------------------------------------------
-# Fonction pour lancer la recherche de livre par catégorie --->OK
+# Fonction pour lancer la recherche de livre par catégorie
 #-----------------------------------------------------------------
 
 def lancement_export_ouvrage(url_general, liste_ouvrage_categorie):
@@ -38,7 +38,7 @@ def export_ouvrage(url_general,liste_ouvrage_categorie):
 
 
 #-----------------------------------------------------------------
-# Fonction pour la création du fichier csv --->OK
+# Fonction pour la création du fichier csv
 #-----------------------------------------------------------------
 def creation_csv(liste_entete,dico_entete,nom_du_csv):
     liste_entete_csv_export=[] # Création d'une liste vide pour déverser les valeurs dans le fichier CSV
@@ -51,7 +51,7 @@ def creation_csv(liste_entete,dico_entete,nom_du_csv):
 
 
 #-----------------------------------------------------------------
-# Fonction pour l'export des données du livre --->OK
+# Fonction pour l'export des données du livre
 #-----------------------------------------------------------------
 def analyse_livre(liste_entete,dico_entete,url_general,url_courant_livre,nom_du_csv,fichier_image):
 
@@ -145,7 +145,6 @@ def analyse_livre(liste_entete,dico_entete,url_general,url_courant_livre,nom_du_
         response = requests.get(balise_url)
         f.write(response.content)
         f.close()
-        print("rajout du livre : ",balise_title)
          
 #-----------------Export dans un fichier csv--------------------------
 #------ Mise en place des champs

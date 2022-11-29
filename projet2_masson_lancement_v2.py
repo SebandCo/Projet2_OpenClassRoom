@@ -53,4 +53,4 @@ for livre in tqdm(liste_ouvrage_categorie,desc="Analyse en cours", unit="livre")
        url_courant_livre=livre #Défini le livre en cours
        analyse_livre(liste_entete,dico_entete,url_general,url_courant_livre,nom_du_csv,fichier_image) #Lance le programme
 
-print("Fin de l'analyse","\nAnalyse réalisé en",int(time.time() - start_time),"secondes")#Fin du programme
+print("Fin de l'analyse","\nAnalyse réalisée en",int(time.time() - start_time),"secondes")#Fin du programme

@@ -80,6 +80,7 @@ def analyse_livre(liste_entete,dico_entete,url_general,url_courant_livre,nom_du_
 
 
 #------- Récupére le product_page_url .....
+
     dico_courant["url"]=url_courant_livre
 
 #------- Récupére le title
